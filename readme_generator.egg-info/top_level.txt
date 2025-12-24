@@ -1,3 +1,0 @@
-readme_generator
-tests
-venv

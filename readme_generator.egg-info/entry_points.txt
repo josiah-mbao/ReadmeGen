@@ -1,2 +1,0 @@
-[console_scripts]
-readmegenerator = readme_generator.cli:app
