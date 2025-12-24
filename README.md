@@ -1,5 +1,9 @@
 # ReadmeGen
 
+[![PyPI version](https://badge.fury.io/py/readmegen.svg)](https://badge.fury.io/py/readmegen)
+[![Python Version](https://img.shields.io/pypi/pyversions/readmegen.svg)](https://pypi.org/project/readmegen/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 AI-Powered GitHub README Generator - Zero-friction CLI for professional README files
 
 ## 🚀 Quick Start
