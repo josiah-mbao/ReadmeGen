@@ -3,20 +3,35 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "readme-generator"
+name = "readmegen"
 version = "0.1.0"
-description = "AI-Powered GitHub README Generator"
+description = "AI-Powered GitHub README Generator - Zero-friction CLI for professional README files"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
 ]
+keywords = ["readme", "generator", "cli", "markdown", "documentation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
 dependencies = [
     "typer[all]>=0.9.0",
     "jinja2>=3.1.0",
     "pyyaml>=6.0",
     "rich>=13.0.0",
+    "questionary>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -25,6 +40,7 @@ dev = [
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
+    "questionary>=2.0.0",
 ]
 ai = [
     "openai>=1.0.0",
@@ -34,8 +50,15 @@ github = [
     "PyGithub>=1.59.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/your-username/ReadmeGen"
+Documentation = "https://github.com/your-username/ReadmeGen#readme"
+Repository = "https://github.com/your-username/ReadmeGen"
+Issues = "https://github.com/your-username/ReadmeGen/issues"
+Changelog = "https://github.com/your-username/ReadmeGen/releases"
+
 [project.scripts]
-readmegenerator = "readme_generator.cli:app"
+readmegen = "readme_generator.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]

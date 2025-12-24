@@ -1,131 +1,82 @@
-# AI-Powered GitHub README Generator
+# ReadmeGen
 
-A Python CLI tool designed to streamline README creation for developers. Generate professional README files with template-driven generation and optional AI-assisted content enhancement.
+AI-Powered GitHub README Generator - Zero-friction CLI for professional README files
 
-## 🚀 Features
+## 🚀 Quick Start
 
-### MVP Features (Phase 1)
-- **Interactive CLI**: Step-by-step prompts for project details
-- **Template System**: Multiple README templates (minimal, standard, fancy) using Jinja2
-- **Markdown Output**: Clean README.md ready for GitHub
-- **Basic Feature Input**: Manual feature listing
-
-### Phase 2 Enhancements
-- **AI-assisted Content**: Expands short descriptions into detailed paragraphs
-- **AI Feature Suggestion**: Suggests key project features if not provided
-- **GitHub API Integration**: Automatically fetch repo details (URL, license, contributors)
-- **Optional Live Markdown Preview**: Preview in CLI
-
-### Phase 3 Advanced Features
-- **Web UI**: Lightweight Flask/FastAPI interface for non-CLI users
-- **Badge Auto-generation**: Build, license, coverage, or Python/Rust version badges
-- **Multi-language Support**: Generate READMEs in multiple languages
-- **GitHub Action Integration**: Auto-generate or update README on repo creation or commit
-- **Custom AI Prompts/Templates**: Users can define custom content styles
-
-## 📦 Installation
-
-### Prerequisites
-- Python 3.11 or higher
-- pip package manager
-
-### From Source
-
+**Install in one command:**
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/ReadmeGen.git
-cd ReadmeGen
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install the package
-pip install -e .
+pip install readmegen
 ```
 
-## 🎯 Usage
-
-### Quick Start
-
-#### 1. Initialize a New Project
+**Generate a README in 60 seconds:**
 ```bash
-readmegenerator init
-```
-This will guide you through an interactive setup to create a README for your project.
-
-#### 2. Generate README with Options
-```bash
-readmegenerator generate --name "My Project" --description "A great project" --template standard
+readmegen init
 ```
 
-#### 3. List Available Templates
+That's it! ReadmeGen will guide you through creating a professional README with smart defaults and interactive prompts.
+
+## 🎯 Features
+
+### Zero-Friction Adoption
+- **Single-line install**: `pip install readmegen`
+- **60-second setup**: Interactive prompts with smart defaults
+- **No configuration needed**: Works out of the box
+- **Professional results**: Generate GitHub-ready README files instantly
+
+### Interactive CLI
+- **Smart defaults**: Auto-detects project name, uses sensible defaults
+- **Visual templates**: See template previews before selecting
+- **Progress feedback**: Real-time progress during generation
+- **Error handling**: Graceful failures with clear messages
+
+### Three Professional Templates
+- **Minimal**: Clean, essential sections only
+- **Standard**: Comprehensive with table of contents, installation, usage
+- **Fancy**: Rich formatting with badges, emojis, and advanced sections
+
+## 📖 Usage
+
+### Quick Setup (Recommended)
 ```bash
-readmegenerator templates
+# Install
+pip install readmegen
+
+# Initialize new project
+readmegen init
+```
+
+### Generate README with Options
+```bash
+# Generate with specific options
+readmegen generate --name "My Project" --description "A great project" --template standard
+
+# Generate with AI enhancement (optional)
+readmegen generate --name "My AI Project" --ai
+
+# List available templates
+readmegen templates
 ```
 
 ### CLI Options
+- `--name, -n`: Project name (auto-detected from directory)
+- `--description, -d`: Project description
+- `--template, -t`: Template (minimal, standard, fancy) - default: standard
+- `--output, -o`: Output file path - default: README.md
+- `--ai`: Enable AI content enhancement (optional)
+- `--github`: Enable GitHub metadata fetching (optional)
+- `--force, -f`: Overwrite existing README.md
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--name, -n` | Project name | Current directory name |
-| `--description, -d` | Project description | "A brief description" |
-| `--template, -t` | Template to use (minimal, standard, fancy) | standard |
-| `--output, -o` | Output file path | README.md |
-| `--ai` | Enable AI content enhancement | false |
-| `--github` | Enable GitHub metadata fetching | false |
-| `--force, -f` | Overwrite existing README.md | false |
+## 🎨 Templates
 
-### Templates
+### Minimal Template
+Perfect for simple projects that need just the essentials.
 
-#### Minimal Template
-A clean, minimal README with essential sections only:
-- Project title and description
-- Features list
-- Usage section
-- License information
+### Standard Template
+Comprehensive template with all common sections: features, installation, usage, contributing, license.
 
-#### Standard Template
-A comprehensive README with all common sections:
-- Table of contents
-- Features
-- Installation instructions
-- Usage examples
-- Contributing guidelines
-- License
-
-#### Fancy Template
-A rich README with badges, tables, and advanced formatting:
-- GitHub badges and status indicators
-- Detailed table of contents
-- Advanced formatting with emojis
-- Comprehensive documentation sections
-- Support and acknowledgment sections
-
-## 🧪 Examples
-
-### Basic Usage
-```bash
-# Interactive setup
-readmegenerator init
-
-# Generate with specific options
-readmegenerator generate \
-  --name "Awesome Project" \
-  --description "An awesome Python project" \
-  --template fancy \
-  --features "Feature 1" "Feature 2" "Feature 3"
-```
-
-### Advanced Usage with AI
-```bash
-# Enable AI content enhancement
-readmegenerator generate \
-  --name "My AI Project" \
-  --description "A project using AI" \
-  --ai \
-  --github
-```
+### Fancy Template
+Rich template with badges, tables, and advanced formatting for professional projects.
 
 ## 🏗️ Project Structure
 
@@ -133,17 +84,12 @@ readmegenerator generate \
 readme_generator/
 ├── readme_generator/            # Core package
 │   ├── __init__.py
-│   ├── cli.py                   # CLI interface and prompts
-│   ├── generator.py             # Core logic to generate README from templates
-│   ├── templates.py             # Manage available README templates
-│   ├── ai.py                    # AI integration for description & feature enhancement
-│   ├── github_api.py            # Optional: fetch repo metadata from GitHub
-│   └── utils.py                 # Helper functions
-├── templates/                   # Jinja2 README templates
-│   ├── minimal.md.j2
-│   ├── standard.md.j2
-│   └── fancy.md.j2
-├── tests/                       # Unit & integration tests
+│   ├── cli.py                   # CLI interface with interactive prompts
+│   ├── generator.py             # Core README generation logic
+│   ├── templates.py             # Template management system
+│   ├── utils.py                 # Utility functions
+│   └── templates/               # Jinja2 README templates
+├── tests/                       # Unit tests
 ├── pyproject.toml               # Project configuration
 └── README.md                    # This file
 ```
@@ -151,141 +97,69 @@ readme_generator/
 ## 🧪 Testing
 
 Run the test suite:
-
 ```bash
-# Run all tests
 pytest
-
-# Run tests with verbose output
-pytest -v
-
-# Run specific test file
-pytest tests/test_generator.py
 ```
 
 ## 🔧 Development
 
-### Setting up Development Environment
+### Setup
+```bash
+# Clone and install
+git clone https://github.com/your-username/ReadmeGen.git
+cd ReadmeGen
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -e .[dev]
+```
 
-1. **Clone and Install**
-   ```bash
-   git clone https://github.com/your-username/ReadmeGen.git
-   cd ReadmeGen
-   python -m venv venv
-   source venv/bin/activate
-   pip install -e .[dev]
-   ```
+### Testing
+```bash
+# Run all tests
+pytest
 
-2. **Code Style**
-   ```bash
-   # Format code with black
-   black readme_generator/ tests/
-   
-   # Check code style with ruff
-   ruff check readme_generator/ tests/
-   ```
+# Run with coverage
+pytest --cov=readme_generator
+```
 
-3. **Run Tests**
-   ```bash
-   pytest
-   ```
+## 📋 Roadmap
 
-### Adding New Templates
+### Phase A: Distribution & Trust (Current)
+- ✅ Polished CLI with interactive prompts
+- ✅ Smart defaults and zero-config setup
+- ✅ Professional templates with previews
+- ✅ PyPI package ready for distribution
 
-1. Create a new Jinja2 template in `templates/` directory
-2. Add template description to `TEMPLATE_DESCRIPTIONS` in `templates.py`
-3. Test the template with sample data
+### Phase B: Trust & Adoption
+- [ ] Comprehensive error handling
+- [ ] Clear failure messages
+- [ ] Deterministic output
+- [ ] Demo materials and documentation
 
-### Adding New Features
+### Phase C: Power Unlocks (Future)
+- [ ] AI content enhancement (optional)
+- [ ] GitHub metadata fetching (optional)
+- [ ] Configuration persistence
 
-1. Implement the feature in the appropriate module
-2. Add CLI options if needed in `cli.py`
-3. Write tests in `tests/` directory
-4. Update documentation
-
-## 🤖 AI Integration (Future)
-
-The AI integration will be implemented in Phase 2 and will include:
-
-- **Content Enhancement**: Expand short descriptions into detailed paragraphs
-- **Feature Suggestions**: Suggest key project features using AI analysis
-- **Usage Examples**: Generate realistic usage examples
-- **Multi-language Support**: Translate README content to different languages
-
-## 🔗 GitHub Integration (Future)
-
-GitHub integration will be implemented in Phase 2 and will include:
-
-- **Repository Metadata**: Fetch repo URL, license, contributors automatically
-- **Badge Generation**: Generate GitHub-specific badges
-- **Issue Tracking**: Link to issues and pull requests
-- **Release Information**: Include latest release information
-
-## 🌐 Web Interface (Future)
-
-A web interface will be implemented in Phase 3 using Flask or FastAPI, providing:
-
-- **Template Preview**: See how templates will look before generation
-- **Form-based Input**: Fill forms instead of using CLI
-- **Real-time Preview**: See README changes in real-time
-- **Export Options**: Download README or copy to clipboard
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Phase D: Surface Area Expansion (Future)
+- [ ] Web UI interface
+- [ ] README previews
+- [ ] Team templates
+- [ ] Org-level configs
 
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-### Development Setup
+## 📄 License
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/ReadmeGen.git`
-3. Create a virtual environment: `python -m venv venv`
-4. Activate the virtual environment: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
-5. Install dependencies: `pip install -e .[dev]`
-6. Make your changes
-7. Run tests: `pytest`
-8. Submit a pull request
-
-## 📞 Support
-
-If you have any questions or need help, please:
-
-- 📖 Read our [FAQ](docs/FAQ.md)
-- 🐛 Report bugs by [opening an issue](https://github.com/your-username/ReadmeGen/issues/new)
-- 💬 Join our [Discord community](#)
-- 📧 Email us at support@example.com
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Thanks to all contributors
-- Inspired by similar projects in the community
-- Built with ❤️ using Python and modern development tools
-
-## 📋 Roadmap
-
-### Phase 1: MVP (Current)
-- [x] Project structure setup
-- [x] CLI interface with typer
-- [x] Template system with Jinja2
-- [x] Core generator logic
-- [x] Three initial templates (minimal, standard, fancy)
-- [x] Basic file I/O and validation
-- [x] Unit tests for core functionality
-
-### Phase 2: AI Integration
-- [ ] AI content enhancement
-- [ ] GitHub API integration
-- [ ] Badge auto-generation
-- [ ] Enhanced templates
-
-### Phase 3: Advanced Features
-- [ ] Web UI interface
-- [ ] Multi-language support
-- [ ] GitHub Action integration
-- [ ] Custom AI prompts/templates
+- Built with ❤️ using Python, typer, questionary, and rich
+- Inspired by the need for better README generation tools
+- Thanks to all contributors and early adopters
 
 ---
 

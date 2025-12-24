@@ -1,0 +1,4 @@
+dist
+readme_generator
+tests
+venv
