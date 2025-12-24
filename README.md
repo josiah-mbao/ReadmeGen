@@ -1,7 +1,7 @@
 # ReadmeGen
 
-[![PyPI version](https://badge.fury.io/py/readmegen.svg)](https://badge.fury.io/py/readmegen)
-[![Python Version](https://img.shields.io/pypi/pyversions/readmegen.svg)](https://pypi.org/project/readmegen/)
+[![PyPI version](https://badge.fury.io/py/readmegen-oss.svg)](https://badge.fury.io/py/readmegen-oss)
+[![Python Version](https://img.shields.io/pypi/pyversions/readmegen-oss.svg)](https://pypi.org/project/readmegen-oss/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 AI-Powered GitHub README Generator - Zero-friction CLI for professional README files
@@ -10,7 +10,7 @@ AI-Powered GitHub README Generator - Zero-friction CLI for professional README f
 
 **Install in one command:**
 ```bash
-pip install readmegen
+pip install readmegen-oss
 ```
 
 **Generate a README in 60 seconds:**
@@ -23,7 +23,7 @@ That's it! ReadmeGen will guide you through creating a professional README with 
 ## 🎯 Features
 
 ### Zero-Friction Adoption
-- **Single-line install**: `pip install readmegen`
+- **Single-line install**: `pip install readmegen-oss`
 - **60-second setup**: Interactive prompts with smart defaults
 - **No configuration needed**: Works out of the box
 - **Professional results**: Generate GitHub-ready README files instantly
@@ -44,7 +44,7 @@ That's it! ReadmeGen will guide you through creating a professional README with 
 ### Quick Setup (Recommended)
 ```bash
 # Install
-pip install readmegen
+pip install readmegen-oss
 
 # Initialize new project
 readmegen init
