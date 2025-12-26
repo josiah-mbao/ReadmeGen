@@ -66,6 +66,9 @@ where = ["."]
 [tool.setuptools.package-data]
 readme_generator = ["templates/*.j2"]
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.ruff]
 line-length = 88
 target-version = "py311"

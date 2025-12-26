@@ -6,7 +6,7 @@ Minimal documentation focused on getting started quickly.
 
 ### Installation
 ```bash
-pip install readmegen
+pip install readmegen-oss
 ```
 
 ### Basic Usage

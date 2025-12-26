@@ -43,25 +43,26 @@ def get_template_path(template_name: str) -> Optional[Path]:
 
 def load_template(template_name: str) -> Optional[Template]:
     """Load a Jinja2 template by name with improved error handling."""
-    template_path = get_template_path(template_name)
-    
-    if template_path is None:
-        return None
-    
-    # Create Jinja2 environment with the templates directory
+    # First try PackageLoader (works better for installed packages)
     try:
-        env = Environment(loader=FileSystemLoader(str(template_path.parent)))
-        return env.get_template(template_path.name)
+        from jinja2 import PackageLoader
+        env = Environment(
+            loader=PackageLoader('readme_generator', 'templates')
+        )
+        return env.get_template(f"{template_name}.md.j2")
     except Exception:
-        # Try fallback using PackageLoader if FileSystemLoader fails
+        # Fallback to FileSystemLoader for development
+        template_path = get_template_path(template_name)
+        
+        if template_path is None:
+            return None
+        
         try:
-            from jinja2 import PackageLoader
             env = Environment(
-                loader=PackageLoader('readme_generator', 'templates')
+                loader=FileSystemLoader(str(template_path.parent))
             )
-            return env.get_template(f"{template_name}.md.j2")
+            return env.get_template(template_path.name)
         except Exception:
-            # If both methods fail, return None
             return None
 
 
