@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader, Template
 
+
 # Template descriptions for user guidance
 TEMPLATE_DESCRIPTIONS = {
     "minimal": "A clean, minimal README with essential sections only",
@@ -20,6 +21,7 @@ TEMPLATE_DESCRIPTIONS = {
 def get_available_templates() -> List[str]:
     """Get list of available template names."""
     return list(TEMPLATE_DESCRIPTIONS.keys())
+
 
 def get_template_description(template_name: str) -> str:
     """Get description for a template."""
@@ -40,19 +42,27 @@ def get_template_path(template_name: str) -> Optional[Path]:
 
 
 def load_template(template_name: str) -> Optional[Template]:
-    """Load a Jinja2 template by name."""
+    """Load a Jinja2 template by name with improved error handling."""
     template_path = get_template_path(template_name)
     
     if template_path is None:
         return None
     
     # Create Jinja2 environment with the templates directory
-    env = Environment(loader=FileSystemLoader(str(template_path.parent)))
-    
     try:
+        env = Environment(loader=FileSystemLoader(str(template_path.parent)))
         return env.get_template(template_path.name)
     except Exception:
-        return None
+        # Try fallback using PackageLoader if FileSystemLoader fails
+        try:
+            from jinja2 import PackageLoader
+            env = Environment(
+                loader=PackageLoader('readme_generator', 'templates')
+            )
+            return env.get_template(f"{template_name}.md.j2")
+        except Exception:
+            # If both methods fail, return None
+            return None
 
 
 def render_template(template_name: str, context: Dict) -> Optional[str]:
