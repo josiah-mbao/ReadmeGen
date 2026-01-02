@@ -1,4 +1,4 @@
-# [ReadmeGen](https://josiah-mbao.github.io/readmegen-frontend/)
+# [ReadmeGen](https://josiah-mbao.github.io/readmegen-site/)
 
 [![PyPI version](https://badge.fury.io/py/readmegen-oss.svg)](https://badge.fury.io/py/readmegen-oss)
 [![Python Version](https://img.shields.io/pypi/pyversions/readmegen-oss.svg)](https://pypi.org/project/readmegen-oss/)
