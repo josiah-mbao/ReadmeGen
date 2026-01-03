@@ -1,5 +1,7 @@
 # [ReadmeGen](https://josiah-mbao.github.io/readmegen-site/)
 
+[![CI](https://github.com/josiah-mbao/ReadmeGen/workflows/CI/badge.svg)](https://github.com/josiah-mbao/ReadmeGen/actions)
+[![codecov](https://codecov.io/gh/josiah-mbao/ReadmeGen/branch/master/graph/badge.svg)](https://codecov.io/gh/josiah-mbao/ReadmeGen)
 [![PyPI version](https://badge.fury.io/py/readmegen-oss.svg)](https://badge.fury.io/py/readmegen-oss)
 [![Python Version](https://img.shields.io/pypi/pyversions/readmegen-oss.svg)](https://pypi.org/project/readmegen-oss/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
