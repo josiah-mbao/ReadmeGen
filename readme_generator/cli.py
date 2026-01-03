@@ -16,7 +16,7 @@ import questionary
 import traceback
 import sys
 
-from .generator import generate_readme
+from .generator import generate_readme, detect_project_type
 from .templates import get_available_templates, get_template_description
 from .utils import validate_project_name, validate_description
 
@@ -64,30 +64,405 @@ def handle_error(error: Exception, context: str = "operation"):
     
     raise typer.Exit(code=1)
 
-# Template preview snippets for user guidance
+# Enhanced template previews with rich formatting and real examples
 TEMPLATE_PREVIEWS = {
-    "minimal": (
-        "# Project Name\n\nBrief description\n\n## Features\n"
-        "- Feature 1\n- Feature 2\n\n## Usage\n\n## License"
-    ),
-    "standard": (
-        "# Project Name\n\nBrief description\n\n## Table of Contents\n"
-        "## Features\n## Installation\n## Usage\n## Contributing\n## License"
-    ),
-    "fancy": (
-        "# Project Name\n\n[![Badge]]()\n\nBrief description\n\n"
-        "## ✨ Features\n## 🚀 Quick Start\n## 🛠️ Installation\n"
-        "## 💻 Usage\n## 🧪 Testing\n## 🤝 Contributing\n## 📜 License"
-    ),
+    "minimal": {
+        "title": "🎯 Minimal",
+        "description": "Clean and simple - perfect for basic projects",
+        "includes": ["Title", "Description", "Features", "Installation", "Usage", "License"],
+        "preview": """# MyProject
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+A simple and elegant solution for everyday tasks.
+
+## Installation
+
+```bash
+pip install myproject
+```
+
+## Features
+
+- Easy to use
+- Lightweight and fast
+- Well documented
+
+## Usage
+
+```python
+from myproject import main
+main()
+```
+
+## License
+
+This project is licensed under the MIT License.""",
+        "best_for": "Tiny libraries, simple scripts, proof-of-concepts"
+    },
+    "standard": {
+        "title": "📋 Standard",
+        "description": "Professional and comprehensive - the sweet spot",
+        "includes": ["Title + Badge", "TOC", "Prerequisites", "Installation", "Features", "Usage", "Contributing", "License"],
+        "preview": """# MyProject
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+A comprehensive solution with professional documentation and testing.
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Prerequisites
+
+- Python 3.8+
+- pip package manager
+
+## Installation
+
+```bash
+pip install myproject
+```
+
+## Features
+
+- Comprehensive feature set
+- Easy to use interface
+- Well documented
+- Actively maintained
+
+## Usage
+
+```python
+from myproject import main
+main()
+```
+
+## Contributing
+
+We welcome contributions! See CONTRIBUTING.md for details.
+
+## License
+
+This project is licensed under the MIT License.""",
+        "best_for": "Most projects, libraries, web apps, CLIs"
+    },
+    "fancy": {
+        "title": "✨ Fancy",
+        "description": "Rich and polished - for serious, professional projects",
+        "includes": ["Badges", "TOC", "Prerequisites", "Installation", "Features", "Quick Start", "Usage", "Testing", "Contributing", "Support", "License"],
+        "preview": """# MyProject
+
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+
+A powerful, enterprise-ready solution with comprehensive documentation.
+
+## Table of Contents
+
+- [✨ Features](#-features)
+- [🚀 Quick Start](#-quick-start)
+- [🛠️ Installation](#️-installation)
+- [💻 Usage](#-usage)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
+
+## ✨ Features
+
+- 🚀 **Fast**: Optimized performance
+- 📦 **Modular**: Clean architecture
+- 🧪 **Tested**: Comprehensive test suite
+- 📖 **Documented**: Extensive docs
+
+## 🚀 Quick Start
+
+```bash
+pip install myproject
+python -c "import myproject; myproject.run()"
+```
+
+## 🛠️ Installation
+
+### Prerequisites
+- Python 3.8+
+- pip package manager
+
+### From PyPI
+```bash
+pip install myproject
+```
+
+## 💻 Usage
+
+```python
+from myproject import MyProject
+
+app = MyProject()
+app.run()
+```
+
+## 🤝 Contributing
+
+We love contributions! See CONTRIBUTING.md for guidelines.
+
+## 📜 License
+
+Licensed under MIT License.""",
+        "best_for": "Large projects, enterprise software, frameworks"
+    }
 }
 
 
+def detect_license():
+    """Detect project license from common files."""
+    cwd = Path.cwd()
+
+    # Check for LICENSE file
+    license_file = cwd / "LICENSE"
+    if license_file.exists():
+        content = license_file.read_text().lower()
+        if "mit" in content:
+            return "MIT"
+        elif "apache" in content and "2.0" in content:
+            return "Apache 2.0"
+        elif "gpl" in content and "3.0" in content:
+            return "GPL 3.0"
+        elif "bsd" in content:
+            return "BSD 3-Clause"
+
+    # Check package.json for license field
+    package_json = cwd / "package.json"
+    if package_json.exists():
+        try:
+            import json
+            with open(package_json) as f:
+                data = json.load(f)
+                license_field = data.get("license", "").upper()
+                if license_field in ["MIT", "APACHE-2.0", "GPL-3.0", "BSD-3-CLAUSE"]:
+                    return license_field.replace("-", " ").replace("APACHE-2.0", "Apache 2.0").replace("GPL-3.0", "GPL 3.0").replace("BSD-3-CLAUSE", "BSD 3-Clause")
+        except:
+            pass
+
+    return "MIT"  # Default fallback
+
+
+def detect_description():
+    """Detect project description from various sources."""
+    cwd = Path.cwd()
+
+    # Check package.json
+    package_json = cwd / "package.json"
+    if package_json.exists():
+        try:
+            import json
+            with open(package_json) as f:
+                data = json.load(f)
+                desc = data.get("description")
+                if desc and len(desc) > 10:
+                    return desc
+        except:
+            pass
+
+    # Check setup.py
+    setup_py = cwd / "setup.py"
+    if setup_py.exists():
+        content = setup_py.read_text()
+        # Look for description= in setup.py
+        import re
+        match = re.search(r'description\s*=\s*["\']([^"\']+)["\']', content)
+        if match:
+            desc = match.group(1)
+            if len(desc) > 10:
+                return desc
+
+    # Check README.md first paragraph
+    readme = cwd / "README.md"
+    if readme.exists():
+        content = readme.read_text()
+        # Get first paragraph after title
+        lines = content.split('\n')
+        description_lines = []
+        in_description = False
+        for line in lines[1:]:  # Skip title
+            line = line.strip()
+            if line and not line.startswith('#') and not line.startswith('[') and not line.startswith('!'):
+                description_lines.append(line)
+                in_description = True
+            elif in_description and not line:
+                break
+            elif in_description:
+                break
+
+        desc = ' '.join(description_lines).strip()
+        if desc and len(desc) > 10 and len(desc) < 200:
+            return desc
+
+    return "A brief description of your project"
+
+
+def detect_features():
+    """Detect project features from various sources."""
+    cwd = Path.cwd()
+    features = []
+
+    # Check package.json keywords
+    package_json = cwd / "package.json"
+    if package_json.exists():
+        try:
+            import json
+            with open(package_json) as f:
+                data = json.load(f)
+                keywords = data.get("keywords", [])
+                if keywords:
+                    # Convert keywords to feature statements
+                    for keyword in keywords[:3]:  # Limit to 3
+                        features.append(f"Supports {keyword}")
+        except:
+            pass
+
+    # Check for common project patterns
+    if (cwd / "tests").exists() or (cwd / "test").exists():
+        features.append("Well tested")
+
+    if (cwd / "docs").exists() or (cwd / "doc").exists():
+        features.append("Comprehensive documentation")
+
+    if (cwd / "examples").exists() or (cwd / "example").exists():
+        features.append("Includes examples")
+
+    if (cwd / "Dockerfile").exists():
+        features.append("Docker support")
+
+    if (cwd / ".github" / "workflows").exists():
+        features.append("CI/CD integration")
+
+    # If no features detected, provide generic ones
+    if not features:
+        features = ["Easy to use", "Well documented", "Actively maintained"]
+
+    return features[:5]  # Limit to 5 features
+
+
+def suggest_template():
+    """Suggest appropriate template based on project characteristics."""
+    cwd = Path.cwd()
+
+    # Count source files
+    source_files = 0
+    for ext in ['.py', '.js', '.ts', '.rs', '.go', '.java', '.cpp', '.c']:
+        source_files += len(list(cwd.glob(f'**/*{ext}')))
+
+    # Check for advanced project features
+    has_ci = (cwd / ".github" / "workflows").exists()
+    has_docker = (cwd / "Dockerfile").exists()
+    has_docs = (cwd / "docs").exists()
+    has_tests = (cwd / "tests").exists() or (cwd / "test").exists()
+    has_contributing = (cwd / "CONTRIBUTING.md").exists()
+
+    advanced_features = sum([has_ci, has_docker, has_docs, has_tests, has_contributing])
+
+    # Template logic
+    if source_files < 5 and advanced_features < 2:
+        return "minimal"
+    elif source_files < 20 and advanced_features < 4:
+        return "standard"
+    else:
+        return "fancy"
+
+
+def get_feature_suggestions(project_type: str) -> list:
+    """Get project-type-specific feature suggestions."""
+    suggestions = {
+        "javascript": [
+            "Fast and lightweight",
+            "Browser and Node.js compatible",
+            "ES6+ modern JavaScript",
+            "NPM package ready",
+            "TypeScript support optional",
+            "React/Vue/Angular compatible",
+            "Webpack/Rollup build tools",
+            "Jest testing framework",
+            "ESLint code quality",
+            "Modular architecture"
+        ],
+        "python": [
+            "Python 3.8+ compatible",
+            "Pip package ready",
+            "Comprehensive documentation",
+            "Type hints included",
+            "Async/await support",
+            "Cross-platform compatibility",
+            "Virtual environment ready",
+            "pytest testing framework",
+            "Black code formatting",
+            "Comprehensive error handling"
+        ],
+        "rust": [
+            "Memory safe and fast",
+            "Zero-cost abstractions",
+            "Cargo package manager",
+            "Cross-platform compilation",
+            "Comprehensive testing",
+            "Documentation generation",
+            "Benchmarking support",
+            "No runtime overhead",
+            "Thread safety guaranteed",
+            "WebAssembly compatible"
+        ],
+        "go": [
+            "Compiled and fast",
+            "Simple and readable",
+            "Cross-platform binaries",
+            "Built-in concurrency",
+            "Strong static typing",
+            "Excellent testing support",
+            "Go modules support",
+            "Fast compilation",
+            "Docker container ready",
+            "Microservices friendly"
+        ],
+        "java": [
+            "JVM compatible",
+            "Maven/Gradle build tools",
+            "Spring Boot ready",
+            "Comprehensive testing",
+            "Enterprise grade",
+            "Multi-threading support",
+            "JPA/Hibernate integration",
+            "REST API capable",
+            "Docker containerization",
+            "Cloud deployment ready"
+        ],
+        "generic": [
+            "Easy to use",
+            "Well documented",
+            "Cross-platform",
+            "Actively maintained",
+            "Open source",
+            "Community supported",
+            "Regular updates",
+            "Issue tracking",
+            "Feature requests welcome",
+            "Contributing guidelines"
+        ]
+    }
+
+    return suggestions.get(project_type, suggestions["generic"])
+
+
 def get_smart_defaults():
-    """Get smart defaults for project information."""
+    """Get enhanced smart defaults with auto-detection."""
     return {
         "project_name": Path.cwd().name,
-        "template": "standard",
-        "license": "MIT",
+        "description": detect_description(),
+        "template": suggest_template(),
+        "license": detect_license(),
+        "features": detect_features(),
         "ai_enabled": False,
         "github_enabled": False
     }
@@ -186,21 +561,48 @@ def generate(
 
 @app.command()
 def templates():
-    """List available README templates with previews."""
-    templates = get_available_templates()
+    """List available README templates with rich previews."""
+    available_templates = get_available_templates()
 
-    console.print("\n[bold]Available Templates:[/bold]\n")
+    console.print("\n[bold blue]🎨 Available README Templates[/bold blue]")
+    console.print("[dim]Choose the perfect template for your project:[/dim]\n")
 
-    for template_name in templates:
-        description = get_template_description(template_name)
-        preview = TEMPLATE_PREVIEWS.get(template_name, "")
-        console.print(f"• [bold]{template_name}[/bold]: {description}")
-        if preview:
-            preview_text = preview[:60] + "..." if len(preview) > 60 else preview
-            console.print(f"  Preview: {preview_text}")
-        else:
-            console.print("  Preview: No preview available")
-        console.print()
+    for template_name in available_templates:
+        if template_name not in TEMPLATE_PREVIEWS:
+            continue
+
+        template_data = TEMPLATE_PREVIEWS[template_name]
+
+        # Create a rich panel for each template
+        panel_content = f"""[bold cyan]{template_data['title']}[/bold cyan]
+[dim]{template_data['description']}[/dim]
+
+[bold yellow]📋 Includes:[/bold yellow] {', '.join(template_data['includes'])}
+
+[bold yellow]🎯 Best for:[/bold yellow] {template_data['best_for']}
+"""
+
+        # Add preview panel
+        preview_panel = Panel(
+            Syntax(template_data['preview'], "markdown", theme="github-dark", word_wrap=True),
+            title=f"[bold]{template_name.title()} Template Preview[/bold]",
+            border_style="blue",
+            padding=(1, 2)
+        )
+
+        # Main template panel
+        main_panel = Panel(
+            panel_content,
+            title=f"[bold]{template_name.title()}[/bold]",
+            border_style="green",
+            padding=(1, 2)
+        )
+
+        console.print(main_panel)
+        console.print(preview_panel)
+        console.print()  # Spacing between templates
+
+    console.print("[dim]💡 Tip: Templates are auto-suggested based on your project structure![/dim]\n")
 
 @app.command()
 def init():
@@ -210,10 +612,18 @@ def init():
         "Let's set up your project with a professional README!",
         border_style="magenta"
     ))
-    
+
     # Collect project information interactively
     project_info = collect_project_info_interactive()
-    
+
+    # === STEP 4: GENERATION ===
+    def show_progress(step: int, description: str):
+        """Display progress indicator."""
+        progress_bar = "█" * step + "░" * (4 - step)
+        console.print(f"\n[dim][{progress_bar}] Step {step}/4: {description}[/dim]\n")
+
+    show_progress(4, "Generating your README")
+
     # Generate README
     try:
         generate_readme(
@@ -223,101 +633,214 @@ def init():
             ai_enabled=project_info.get("ai_enabled", False),
             github_enabled=project_info.get("github_enabled", False)
         )
-        
+
         console.print("\n[green]✅ Project initialized successfully![/green]")
         console.print("📁 README.md has been created")
         console.print("\n💡 Tip: Use 'readmegen generate --ai' to enhance your README with AI!")
-        
+
     except Exception as e:
         console.print(f"[red]❌ Error initializing project: {e}[/red]")
         raise typer.Exit(code=1)
 
 def collect_project_info_interactive() -> dict:
-    """Collect project information through interactive dropdowns and smart defaults."""
+    """Collect project information through two-tier interactive flow with progress indicators."""
     defaults = get_smart_defaults()
-    
-    # Project name with smart default
-    project_name_input = questionary.text(
-        "Project Name:",
-        default=defaults["project_name"],
-        validate=lambda x: validate_project_name(x) or "Invalid project name",
+
+    console.print("\n[bold blue]🚀 Let's create your README![/bold blue]")
+    console.print("[dim]I'll guide you through setup with smart defaults pre-filled.[/dim]\n")
+
+    # Progress tracking
+    total_steps = 4
+    current_step = 1
+
+    def show_progress(step: int, description: str):
+        """Display progress indicator."""
+        progress_bar = "█" * step + "░" * (total_steps - step)
+        console.print(f"\n[dim][{progress_bar}] Step {step}/{total_steps}: {description}[/dim]\n")
+
+    # === STEP 1: PROJECT ANALYSIS ===
+    show_progress(1, "Analyzing your project")
+    console.print("🔍 [bold]Project Analysis Complete![/bold]")
+    console.print("I've detected your project details:\n")
+
+    # Show detected defaults
+    console.print(f"📁 [bold]Project:[/bold] {defaults['project_name']}")
+    console.print(f"📝 [bold]Description:[/bold] {defaults['description']}")
+    console.print(f"🎨 [bold]Suggested Template:[/bold] {defaults['template']}")
+    console.print(f"📄 [bold]Detected License:[/bold] {defaults['license']}")
+    console.print(f"✨ [bold]Auto-detected Features:[/bold] {', '.join(defaults['features'][:3])}{'...' if len(defaults['features']) > 3 else ''}")
+
+    # === STEP 2: BASIC SETUP TIER ===
+    show_progress(2, "Basic configuration")
+    console.print("[bold cyan]📋 BASIC SETUP[/bold cyan]")
+    console.print("These essentials are auto-detected for your convenience:\n")
+
+    # Show detected defaults
+    console.print(f"📁 [bold]Project:[/bold] {defaults['project_name']}")
+    console.print(f"📝 [bold]Description:[/bold] {defaults['description']}")
+    console.print(f"🎨 [bold]Template:[/bold] {defaults['template']} [dim](auto-suggested)[/dim]")
+    console.print(f"📄 [bold]License:[/bold] {defaults['license']} [dim](auto-detected)[/dim]")
+
+    # Quick accept for basic setup
+    use_basic_defaults = questionary.confirm(
+        "\n✅ Use these basic settings?", default=True
     ).ask()
 
-    project_name = project_name_input or defaults["project_name"]
+    if use_basic_defaults:
+        project_name = defaults["project_name"]
+        description = defaults["description"]
+        template = defaults["template"]
+        license_choice = defaults["license"]
+        console.print("\n[green]✓ Basic setup complete![/green]")
+    else:
+        console.print("\n[blue]Let's customize the basics:[/blue]\n")
 
-    # Project description
-    description_input = questionary.text(
-        "Brief project description:",
-        default="A brief description of your project",
-        validate=lambda x: validate_description(x) or "Description cannot be empty",
+        # Project name with smart default
+        project_name_input = questionary.text(
+            "Project Name:",
+            default=defaults["project_name"],
+            validate=lambda x: validate_project_name(x) or "Invalid project name",
+        ).ask()
+        project_name = project_name_input or defaults["project_name"]
+
+        # Project description with smart default
+        description_input = questionary.text(
+            "Brief project description:",
+            default=defaults["description"],
+            validate=lambda x: validate_description(x) or "Description cannot be empty",
+        ).ask()
+        description = description_input or defaults["description"]
+
+        # Template selection with smart default
+        available_templates = get_available_templates()
+        template_choices = [
+            questionary.Choice("Minimal - Basic sections only", value="minimal"),
+            questionary.Choice("Standard - Full professional README", value="standard"),
+            questionary.Choice("Fancy - Rich formatting + badges", value="fancy"),
+        ]
+
+        template = questionary.select(
+            "Choose a template:",
+            choices=template_choices,
+            default=defaults["template"]
+        ).ask()
+
+        # License selection with smart default
+        license_choices = [
+            questionary.Choice("MIT - Permissive (most common)", value="MIT"),
+            questionary.Choice("Apache 2.0 - Business-friendly", value="Apache 2.0"),
+            questionary.Choice("GPL 3.0 - Copyleft protection", value="GPL 3.0"),
+            questionary.Choice("BSD 3-Clause - Simple permissive", value="BSD 3-Clause"),
+            questionary.Choice("None - No license", value=None),
+        ]
+
+        license_choice = questionary.select(
+            "Choose a license:",
+            choices=license_choices,
+            default=defaults["license"]
+        ).ask()
+
+    # === STEP 3: ADVANCED SETUP TIER ===
+    show_progress(3, "Advanced options")
+    console.print("[bold cyan]⚡ ADVANCED SETUP[/bold cyan]")
+    console.print("[dim]Optional enhancements (skip for quick setup):[/dim]\n")
+
+    # Show auto-detected features
+    console.print(f"✨ [bold]Features auto-detected:[/bold] {', '.join(defaults['features'][:3])}{'...' if len(defaults['features']) > 3 else ''}")
+
+    # Ask if user wants to customize advanced options
+    customize_advanced = questionary.confirm(
+        "\n🔧 Customize advanced options?", default=False
     ).ask()
 
-    description = description_input or "A brief description of your project"
+    if customize_advanced:
+        console.print("\n[blue]Advanced customization:[/blue]\n")
 
-    # Template selection with preview
-    available_templates = get_available_templates()
-    template_choices = []
-    for template_name in available_templates:
-        description_text = get_template_description(template_name)
-        preview = TEMPLATE_PREVIEWS.get(template_name, "")
-        if preview:
-            preview_text = (
-                f"\n  Preview: {preview[:50]}..."
-                if len(preview) > 50
-                else f"\n  Preview: {preview}"
-            )
-        else:
-            preview_text = ""
-        template_choices.append(
-            questionary.Choice(
-                f"{template_name} - {description_text}{preview_text}",
-                value=template_name,
-            )
-        )
+        # Features customization with improved UX
+        features = defaults["features"]
+        console.print(f"Current features: {', '.join(features)}")
 
-    template = questionary.select(
-        "Select a template:", choices=template_choices, default=defaults["template"]
-    ).ask()
+        feature_action = questionary.select(
+            "How would you like to modify features?",
+            choices=[
+                questionary.Choice("✅ Keep auto-detected features", value="keep"),
+                questionary.Choice("➕ Add to auto-detected features", value="add"),
+                questionary.Choice("📝 Replace with custom features", value="replace"),
+                questionary.Choice("🎯 Choose from suggestions", value="suggest"),
+            ],
+            default="keep"
+        ).ask()
 
-    # License selection
-    license_choices = [
-        questionary.Choice("MIT - Permissive", value="MIT"),
-        questionary.Choice("Apache 2.0 - Business-friendly", value="Apache 2.0"),
-        questionary.Choice("GPL 3.0 - Copyleft", value="GPL 3.0"),
-        questionary.Choice("BSD 3-Clause - Simple", value="BSD 3-Clause"),
-        questionary.Choice("None - No license", value=None),
-    ]
+        if feature_action == "add":
+            console.print("\nAdd additional features (one per line, press Enter twice when done):")
+            additional_features = []
+            while True:
+                feature_input = questionary.text("Additional feature:").ask()
+                if not feature_input:
+                    break
+                additional_features.append(feature_input.strip())
+            features.extend([f for f in additional_features if f])
 
-    license_choice = questionary.select(
-        "Choose a license:", choices=license_choices, default=defaults["license"]
-    ).ask()
+        elif feature_action == "replace":
+            console.print("\nEnter custom features (one per line, press Enter twice when done):")
+            features = []
+            while True:
+                feature_input = questionary.text("Feature:").ask()
+                if not feature_input:
+                    break
+                features.append(feature_input.strip())
+            features = [f for f in features if f] or defaults["features"]  # Fallback
 
-    # AI enhancement toggle
-    ai_enabled = questionary.confirm(
-        "Enable AI content enhancement? (Optional - requires OpenAI API key)", default=False
-    ).ask()
+        elif feature_action == "suggest":
+            # Project-type-specific feature suggestions
+            project_type = detect_project_type(Path.cwd())
+            suggested_features = get_feature_suggestions(project_type)
 
-    # GitHub metadata toggle
-    github_enabled = questionary.confirm(
-        "Enable GitHub metadata fetching? (Optional - requires GitHub token)", default=False
-    ).ask()
-
-    # Features (optional)
-    features = []
-    if questionary.confirm("Would you like to add project features?", default=True).ask():
-        while True:
-            feature_input = questionary.text(
-                "Add a feature (or press Enter to skip):"
+            console.print(f"\nSuggested features for {project_type} projects:")
+            selected_suggestions = questionary.checkbox(
+                "Select features to include:",
+                choices=[questionary.Choice(feat, checked=True) for feat in suggested_features[:8]]
             ).ask()
-            if not feature_input:
-                break
-            features.append(feature_input)
 
-    # Usage example (optional)
-    usage_example = ""
-    if questionary.confirm("Would you like to add a usage example?", default=False).ask():
-        usage_example_input = questionary.text("Usage example:").ask()
-        usage_example = usage_example_input or ""
+            if selected_suggestions:
+                features = selected_suggestions
+                # Allow adding custom features too
+                add_custom = questionary.confirm("Add any custom features?", default=False).ask()
+                if add_custom:
+                    console.print("Add custom features (one per line, press Enter twice when done):")
+                    custom_features = []
+                    while True:
+                        feature_input = questionary.text("Custom feature:").ask()
+                        if not feature_input:
+                            break
+                        custom_features.append(feature_input.strip())
+                    features.extend([f for f in custom_features if f])
+            else:
+                features = defaults["features"]  # Fallback
+
+        # elif feature_action == "keep": features remain as defaults
+
+        # Usage example (optional)
+        usage_example = ""
+        add_usage = questionary.confirm("Add a usage example?", default=False).ask()
+        if add_usage:
+            usage_example = questionary.text("Usage example (code snippet):").ask() or ""
+
+        # AI enhancement (de-emphasized)
+        console.print("\n[dim]🤖 AI Enhancement (requires OpenAI API key)[/dim]")
+        ai_enabled = questionary.confirm("Enable AI content enhancement?", default=False).ask()
+
+        # GitHub metadata (de-emphasized)
+        console.print("\n[dim]🔗 GitHub Integration (requires GitHub token)[/dim]")
+        github_enabled = questionary.confirm("Enable GitHub metadata fetching?", default=False).ask()
+
+    else:
+        # Use all defaults for advanced options
+        features = defaults["features"]
+        usage_example = ""
+        ai_enabled = False
+        github_enabled = False
+        console.print("\n[green]✓ Using smart defaults for advanced options![/green]")
 
     return {
         "project_name": project_name,

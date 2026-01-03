@@ -12,6 +12,22 @@ from .templates import render_template
 from .utils import write_file, validate_output_path
 
 
+def detect_project_type(project_root: Path) -> str:
+    """Detect project type based on files present."""
+    if (project_root / "package.json").exists():
+        return "javascript"
+    elif (project_root / "Cargo.toml").exists():
+        return "rust"
+    elif (project_root / "requirements.txt").exists() or (project_root / "pyproject.toml").exists():
+        return "python"
+    elif (project_root / "go.mod").exists():
+        return "go"
+    elif (project_root / "pom.xml").exists() or (project_root / "build.gradle").exists():
+        return "java"
+    else:
+        return "generic"
+
+
 def generate_readme(
     project_info: Dict,
     template_name: str,
@@ -76,6 +92,7 @@ def prepare_template_context(
         "license": project_info.get("license", ""),
         "ai_enabled": ai_enabled,
         "github_enabled": github_enabled,
+        "project_type": detect_project_type(Path.cwd()),
     }
     
     # Add optional GitHub metadata if enabled

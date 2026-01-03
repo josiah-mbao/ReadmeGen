@@ -1,10 +1,14 @@
 # {{ project_name }}
 
+{% if license %}
+[![License](https://img.shields.io/badge/License-{{ license.replace(' ', '%20') }}-blue.svg)](LICENSE)
+{% endif %}
+
 {{ description }}
 
 ## Table of Contents
 
-- [Features](#features)
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -23,7 +27,76 @@
 - Actively maintained
 {% endif %}
 
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+{% if project_type == "javascript" %}
+- [Node.js](https://nodejs.org/) (version 14 or higher)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+{% elif project_type == "rust" %}
+- [Rust](https://www.rust-lang.org/tools/install) (latest stable version)
+- [Cargo](https://doc.rust-lang.org/cargo/) (comes with Rust)
+{% elif project_type == "python" %}
+- [Python](https://python.org) (version 3.8 or higher)
+- [pip](https://pip.pypa.io/en/stable/installation/) (Python package manager)
+{% elif project_type == "go" %}
+- [Go](https://golang.org/dl/) (version 1.16 or higher)
+{% elif project_type == "java" %}
+- [Java JDK](https://adoptium.net/) (version 11 or higher)
+- [Maven](https://maven.apache.org/install.html) or [Gradle](https://gradle.org/install/)
+{% else %}
+- Git (for cloning the repository)
+- Python 3.8+ (for development)
+{% endif %}
+
 ## Installation
+
+Choose one of the following installation methods:
+
+### Package Manager (Recommended)
+
+{% if project_type == "javascript" %}
+```bash
+npm install {{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "rust" %}
+```bash
+cargo install {{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "python" %}
+```bash
+pip install {{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "go" %}
+```bash
+go install github.com/username/{{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "java" %}
+Add to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.example</groupId>
+    <artifactId>{{ project_name.lower().replace(' ', '-') }}</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+Or for Gradle, add to your `build.gradle`:
+
+```gradle
+dependencies {
+    implementation 'com.example:{{ project_name.lower().replace(' ', '-') }}:1.0.0'
+}
+```
+{% else %}
+```bash
+pip install {{ project_name.lower().replace(' ', '-') }}
+```
+{% endif %}
+
+### From Source
 
 ```bash
 # Clone the repository
@@ -33,7 +106,19 @@ git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') 
 cd {{ project_name.lower().replace(' ', '-') }}
 
 # Install dependencies
+{% if project_type == "javascript" %}
+npm install
+{% elif project_type == "rust" %}
+cargo build
+{% elif project_type == "python" %}
 pip install -r requirements.txt
+{% elif project_type == "go" %}
+go build
+{% elif project_type == "java" %}
+mvn clean install  # or ./gradlew build
+{% else %}
+pip install -r requirements.txt
+{% endif %}
 ```
 
 ## Usage
@@ -41,6 +126,21 @@ pip install -r requirements.txt
 {% if usage_example %}
 {{ usage_example }}
 {% else %}
+{% if project_type == "javascript" %}
+```javascript
+const {{ project_name.lower().replace(' ', '_') }} = require('{{ project_name.lower().replace(' ', '-') }}');
+
+{{ project_name.lower().replace(' ', '_') }}.run();
+```
+{% elif project_type == "rust" %}
+```rust
+use {{ project_name.lower().replace(' ', '_') }};
+
+fn main() {
+    {{ project_name.lower().replace(' ', '_') }}::run();
+}
+```
+{% elif project_type == "python" %}
 ```python
 # Import the main module
 from {{ project_name.lower().replace(' ', '_') }} import main
@@ -49,9 +149,114 @@ from {{ project_name.lower().replace(' ', '_') }} import main
 if __name__ == "__main__":
     main()
 ```
+{% elif project_type == "go" %}
+```go
+package main
+
+import (
+    "{{ project_name.lower().replace(' ', '-') }}"
+)
+
+func main() {
+    {{ project_name.lower().replace(' ', '-') }}.Run()
+}
+```
+{% elif project_type == "java" %}
+```java
+public class Main {
+    public static void main(String[] args) {
+        {{ project_name.replace(' ', '') }} app = new {{ project_name.replace(' ', '') }}();
+        app.run();
+    }
+}
+```
+{% else %}
+```bash
+# Run the application
+./{{ project_name.lower().replace(' ', '-') }}
+```
+{% endif %}
 
 ### Configuration
 
+{% if project_type == "javascript" %}
+Create a `.env` file in the root directory:
+
+```env
+# Application configuration
+NODE_ENV=development
+PORT=3000
+API_KEY=your_api_key_here
+DEBUG=true
+```
+
+Then run the application:
+
+```bash
+npm start
+```
+{% elif project_type == "rust" %}
+You can configure the application using environment variables or a config file:
+
+```bash
+# Set environment variables
+export RUST_LOG=debug
+export DATABASE_URL=postgresql://localhost/myapp
+
+# Or create a config.toml file
+[database]
+url = "postgresql://localhost/myapp"
+
+[logging]
+level = "debug"
+```
+
+Then run:
+
+```bash
+cargo run
+```
+{% elif project_type == "python" %}
+Create a `.env` file in the root directory:
+
+```env
+# Application configuration
+DEBUG=True
+SECRET_KEY=your_secret_key_here
+DATABASE_URL=sqlite:///app.db
+```
+
+Then run the application:
+
+```bash
+python -m {{ project_name.lower().replace(' ', '_') }}
+```
+{% elif project_type == "go" %}
+Configure the application using environment variables:
+
+```bash
+export PORT=8080
+export DATABASE_URL=postgres://localhost/myapp
+export LOG_LEVEL=info
+
+go run main.go
+```
+{% elif project_type == "java" %}
+Create an `application.properties` file:
+
+```properties
+# Application configuration
+server.port=8080
+spring.datasource.url=jdbc:h2:mem:testdb
+logging.level.com.example=DEBUG
+```
+
+Then run:
+
+```bash
+mvn spring-boot:run  # or ./gradlew bootRun
+```
+{% else %}
 Create a `.env` file in the root directory:
 
 ```env
@@ -59,20 +264,115 @@ Create a `.env` file in the root directory:
 DEBUG=True
 API_KEY=your_api_key_here
 ```
+
+Then run:
+
+```bash
+python main.py
+```
+{% endif %}
 {% endif %}
 
 ## Contributing
 
-We welcome contributions! Please follow these steps:
+We welcome contributions from everyone! Here's how you can help:
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature-branch`)
-3. Make your changes
-4. Add tests for your changes
-5. Run the test suite (`pytest`)
-6. Commit your changes (`git commit -am 'Add new feature'`)
-7. Push to the branch (`git push origin feature-branch`)
-8. Create a new Pull Request
+### Development Setup
+
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/your-username/{{ project_name.lower().replace(' ', '-') }}.git
+   cd {{ project_name.lower().replace(' ', '-') }}
+   ```
+
+2. **Set up development environment**
+   ```bash
+   {% if project_type == "javascript" %}
+   npm install
+   {% elif project_type == "rust" %}
+   cargo build
+   {% elif project_type == "python" %}
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements-dev.txt
+   {% elif project_type == "go" %}
+   go mod download
+   {% elif project_type == "java" %}
+   mvn clean install  # or ./gradlew build
+   {% else %}
+   pip install -r requirements-dev.txt
+   {% endif %}
+   ```
+
+3. **Run tests** to ensure everything works
+   ```bash
+   {% if project_type == "javascript" %}
+   npm test
+   {% elif project_type == "rust" %}
+   cargo test
+   {% elif project_type == "python" %}
+   pytest
+   {% elif project_type == "go" %}
+   go test ./...
+   {% elif project_type == "java" %}
+   mvn test  # or ./gradlew test
+   {% else %}
+   pytest
+   {% endif %}
+   ```
+
+### Making Changes
+
+1. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or for bug fixes
+   git checkout -b fix/issue-description
+   ```
+
+2. **Make your changes** following our coding standards
+
+3. **Add tests** for new functionality
+
+4. **Update documentation** if needed
+
+5. **Commit your changes**
+   ```bash
+   git add .
+   git commit -m "feat: add new feature description"
+   # Use conventional commit format: feat:, fix:, docs:, style:, refactor:, test:, chore:
+   ```
+
+### Pull Request Process
+
+1. **Push your branch**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+2. **Create a Pull Request** with:
+   - Clear title describing the change
+   - Detailed description of what was changed and why
+   - Screenshots/videos for UI changes
+   - Reference to any related issues
+
+3. **Address review feedback** and make requested changes
+
+### Code Standards
+
+- Follow the existing code style
+- Write clear, descriptive commit messages
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass
+
+### Need Help?
+
+- 📖 Check our [Contributing Guide](CONTRIBUTING.md) for detailed instructions
+- 🐛 [Open an issue](https://github.com/username/{{ project_name.lower().replace(' ', '-') }}/issues) for questions
+- 💬 Join our community discussions
+
+Thank you for contributing! 🎉
 
 ## License
 

@@ -44,6 +44,25 @@
 
 ## 🚀 Quick Start
 
+{% if project_type == "javascript" %}
+```bash
+# Quick installation
+npm install {{ project_name.lower().replace(' ', '-') }}
+
+# Basic usage
+const {{ project_name.lower().replace(' ', '_') }} = require('{{ project_name.lower().replace(' ', '-') }}');
+{{ project_name.lower().replace(' ', '_') }}.run();
+```
+{% elif project_type == "rust" %}
+```bash
+# Quick installation
+cargo install {{ project_name.lower().replace(' ', '-') }}
+
+# Basic usage
+use {{ project_name.lower().replace(' ', '_') }};
+{{ project_name.lower().replace(' ', '_') }}::run();
+```
+{% elif project_type == "python" %}
 ```bash
 # Quick installation
 pip install {{ project_name.lower().replace(' ', '-') }}
@@ -52,6 +71,39 @@ pip install {{ project_name.lower().replace(' ', '-') }}
 from {{ project_name.lower().replace(' ', '_') }} import main
 main()
 ```
+{% elif project_type == "go" %}
+```bash
+# Quick installation
+go install github.com/username/{{ project_name.lower().replace(' ', '-') }}
+
+# Basic usage
+package main
+import "{{ project_name.lower().replace(' ', '-') }}"
+func main() { {{ project_name.lower().replace(' ', '-') }}.Run() }
+```
+{% elif project_type == "java" %}
+```bash
+# Build with Maven
+mvn clean install
+
+# Basic usage
+public class Main {
+    public static void main(String[] args) {
+        {{ project_name.replace(' ', '') }} app = new {{ project_name.replace(' ', '') }}();
+        app.run();
+    }
+}
+```
+{% else %}
+```bash
+# Quick installation
+pip install {{ project_name.lower().replace(' ', '-') }}
+
+# Basic usage
+from {{ project_name.lower().replace(' ', '_') }} import main
+main()
+```
+{% endif %}
 
 ## 📖 Documentation
 
@@ -64,6 +116,42 @@ For detailed documentation, visit our [documentation site](#) or check the [docs
 - Python 3.11 or higher
 - pip package manager
 
+{% if project_type == "javascript" %}
+### From npm
+
+```bash
+npm install {{ project_name.lower().replace(' ', '-') }}
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') }}.git
+cd {{ project_name.lower().replace(' ', '-') }}
+
+# Install dependencies
+npm install
+```
+{% elif project_type == "rust" %}
+### From crates.io
+
+```bash
+cargo install {{ project_name.lower().replace(' ', '-') }}
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') }}.git
+cd {{ project_name.lower().replace(' ', '-') }}
+
+# Build and install
+cargo build --release
+cargo install --path .
+```
+{% elif project_type == "python" %}
 ### From PyPI
 
 ```bash
@@ -83,11 +171,221 @@ pip install -e .
 # Install development dependencies
 pip install -r requirements-dev.txt
 ```
+{% elif project_type == "go" %}
+### From Go
+
+```bash
+go install github.com/username/{{ project_name.lower().replace(' ', '-') }}
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') }}.git
+cd {{ project_name.lower().replace(' ', '-') }}
+
+# Build
+go build
+```
+{% elif project_type == "java" %}
+### From Maven
+
+```xml
+<!-- Add to pom.xml -->
+<dependency>
+    <groupId>com.example</groupId>
+    <artifactId>{{ project_name.lower().replace(' ', '-') }}</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') }}.git
+cd {{ project_name.lower().replace(' ', '-') }}
+
+# Build with Maven
+mvn clean install
+
+# Or with Gradle
+gradle build
+```
+{% else %}
+### From PyPI
+
+```bash
+pip install {{ project_name.lower().replace(' ', '-') }}
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') }}.git
+cd {{ project_name.lower().replace(' ', '-') }}
+
+# Install in development mode
+pip install -e .
+
+# Install development dependencies
+pip install -r requirements-dev.txt
+```
+{% endif %}
 
 ## 💻 Usage
 
 {% if usage_example %}
 {{ usage_example }}
+{% else %}
+{% if project_type == "javascript" %}
+### Basic Example
+
+```javascript
+const {{ project_name.lower().replace(' ', '_') }} = require('{{ project_name.lower().replace(' ', '-') }}');
+
+// Create an instance
+const app = new {{ project_name.replace(' ', '') }}();
+
+// Run the application
+app.run();
+```
+
+### Advanced Configuration
+
+```javascript
+const {{ project_name.lower().replace(' ', '_') }} = require('{{ project_name.lower().replace(' ', '-') }}');
+
+// Configure with options
+const config = {
+    debug: true,
+    verbose: true,
+    outputFormat: 'json'
+};
+
+const app = new {{ project_name.replace(' ', '') }}(config);
+app.process();
+```
+{% elif project_type == "rust" %}
+### Basic Example
+
+```rust
+use {{ project_name.lower().replace(' ', '_') }};
+
+// Create an instance
+let mut app = {{ project_name.replace(' ', '') }}::new();
+
+// Run the application
+app.run();
+```
+
+### Advanced Configuration
+
+```rust
+use {{ project_name.lower().replace(' ', '_') }};
+
+let config = Config {
+    debug: true,
+    verbose: true,
+    output_format: OutputFormat::Json,
+};
+
+let mut app = {{ project_name.replace(' ', '') }}::with_config(config);
+app.process();
+```
+{% elif project_type == "python" %}
+### Basic Example
+
+```python
+from {{ project_name.lower().replace(' ', '_') }} import {{ project_name.lower().replace(' ', '_') }}
+
+# Create an instance
+app = {{ project_name.lower().replace(' ', '_') }}()
+
+# Run the application
+app.run()
+```
+
+### Advanced Configuration
+
+```python
+from {{ project_name.lower().replace(' ', '_') }} import {{ project_name.lower().replace(' ', '_') }}
+
+# Configure with options
+config = {
+    'debug': True,
+    'verbose': True,
+    'output_format': 'json'
+}
+
+app = {{ project_name.lower().replace(' ', '_') }}(config=config)
+app.process()
+```
+{% elif project_type == "go" %}
+### Basic Example
+
+```go
+package main
+
+import (
+    "{{ project_name.lower().replace(' ', '-') }}"
+)
+
+func main() {
+    app := {{ project_name.lower().replace(' ', '-') }}.New()
+    app.Run()
+}
+```
+
+### Advanced Configuration
+
+```go
+package main
+
+import (
+    "{{ project_name.lower().replace(' ', '-') }}"
+)
+
+func main() {
+    config := {{ project_name.lower().replace(' ', '-') }}.Config{
+        Debug: true,
+        Verbose: true,
+        OutputFormat: "json",
+    }
+
+    app := {{ project_name.lower().replace(' ', '-') }}.NewWithConfig(config)
+    app.Process()
+}
+```
+{% elif project_type == "java" %}
+### Basic Example
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        {{ project_name.replace(' ', '') }} app = new {{ project_name.replace(' ', '') }}();
+        app.run();
+    }
+}
+```
+
+### Advanced Configuration
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Config config = new Config()
+            .setDebug(true)
+            .setVerbose(true)
+            .setOutputFormat("json");
+
+        {{ project_name.replace(' ', '') }} app = new {{ project_name.replace(' ', '') }}(config);
+        app.process();
+    }
+}
+```
 {% else %}
 ### Basic Example
 
@@ -116,6 +414,7 @@ config = {
 app = {{ project_name.lower().replace(' ', '_') }}(config=config)
 app.process()
 ```
+{% endif %}
 {% endif %}
 
 ## 🧪 Testing

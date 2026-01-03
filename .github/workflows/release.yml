@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      release_notes:
+        description: 'Release notes'
+        required: false
+        type: string
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine python-semantic-release
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Version bump and release
+      if: github.event_name == 'workflow_dispatch'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Bump version based on input
+        if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
+          semantic-release version --major
+        elif [ "${{ github.event.inputs.version_type }}" = "minor" ]; then
+          semantic-release version --minor
+        else
+          semantic-release version --patch
+        fi
+
+        # Build and publish
+        python -m build
+        twine upload dist/* --skip-existing
+      continue-on-error: false
+
+    - name: Build and publish on release
+      if: github.event_name == 'release'
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        python -m build
+        twine upload dist/*
+
+    - name: Create GitHub release
+      if: github.event_name == 'workflow_dispatch'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        release_name: Release v$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        body: |
+          ## What's Changed
+
+          ${{ github.event.inputs.release_notes || 'Automated release' }}
+
+          ## Installation
+
+          ```bash
+          pip install readmegen-oss
+          ```
+
+          ## Usage
+
+          ```bash
+          readmegen init
+          ```
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/v$(python -c "import tomllib; import re; version = tomllib.load(open('pyproject.toml', 'rb'))['project']['version']; print(re.sub(r'(\d+)\.(\d+)\.(\d+).*', r'\1.\2.\3', version))")...v$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        draft: false
+        prerelease: false
+
+  notify:
+    needs: release
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "Release failed. Check the logs for details."
+        # Could add Slack/Discord notifications here
+
+    - name: Notify on success
+      if: success()
+      run: |
+        echo "Release completed successfully!"
+        # Could add notifications here too

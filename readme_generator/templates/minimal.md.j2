@@ -1,6 +1,46 @@
 # {{ project_name }}
 
+{% if license %}
+[![License: {{ license }}](https://img.shields.io/badge/License-{{ license.replace(' ', '%20') }}-blue.svg)](https://opensource.org/licenses/{{ license.replace(' ', '-') }})
+{% endif %}
+
 {{ description }}
+
+## Installation
+
+{% if project_type == "javascript" %}
+```bash
+npm install {{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "rust" %}
+```bash
+cargo install {{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "python" %}
+```bash
+pip install {{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "go" %}
+```bash
+go install github.com/username/{{ project_name.lower().replace(' ', '-') }}
+```
+{% elif project_type == "java" %}
+```xml
+<!-- Add to pom.xml -->
+<dependency>
+    <groupId>com.example</groupId>
+    <artifactId>{{ project_name.lower().replace(' ', '-') }}</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+{% else %}
+```bash
+# Clone and install
+git clone https://github.com/username/{{ project_name.lower().replace(' ', '-') }}.git
+cd {{ project_name.lower().replace(' ', '-') }}
+pip install .
+```
+{% endif %}
 
 ## Features
 
@@ -9,9 +49,9 @@
 - {{ feature }}
 {% endfor %}
 {% else %}
-- Feature 1
-- Feature 2
-- Feature 3
+- Easy to use
+- Lightweight and fast
+- Well documented
 {% endif %}
 
 ## Usage
@@ -19,10 +59,51 @@
 {% if usage_example %}
 {{ usage_example }}
 {% else %}
-```bash
-# Example usage
-python main.py
+{% if project_type == "javascript" %}
+```javascript
+const {{ project_name.lower().replace(' ', '_') }} = require('{{ project_name.lower().replace(' ', '-') }}');
+
+{{ project_name.lower().replace(' ', '_') }}.run();
 ```
+{% elif project_type == "rust" %}
+```rust
+use {{ project_name.lower().replace(' ', '_') }};
+
+fn main() {
+    {{ project_name.lower().replace(' ', '_') }}::run();
+}
+```
+{% elif project_type == "python" %}
+```python
+from {{ project_name.lower().replace(' ', '_') }} import main
+
+if __name__ == "__main__":
+    main()
+```
+{% elif project_type == "go" %}
+```go
+package main
+
+import "{{ project_name.lower().replace(' ', '-') }}"
+
+func main() {
+    {{ project_name.lower().replace(' ', '-') }}.Run()
+}
+```
+{% elif project_type == "java" %}
+```java
+public class Main {
+    public static void main(String[] args) {
+        {{ project_name.replace(' ', '') }} app = new {{ project_name.replace(' ', '') }}();
+        app.run();
+    }
+}
+```
+{% else %}
+```bash
+./{{ project_name.lower().replace(' ', '-') }}
+```
+{% endif %}
 {% endif %}
 
 {% if license %}

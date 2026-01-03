@@ -110,8 +110,15 @@ extend-exclude = '''
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --strict-markers --cov=readme_generator --cov-report=term-missing --cov-report=html:htmlcov --cov-fail-under=90"
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
+]
+markers = [
+    "unit: Unit tests for individual functions",
+    "integration: Integration tests for component interactions",
+    "e2e: End-to-end tests for complete workflows",
+    "performance: Performance and load tests",
+    "slow: Tests that take longer to run",
 ]

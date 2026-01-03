@@ -1,0 +1,16 @@
+# Global owners
+* @josiah-mbao
+
+# Core functionality
+readme_generator/ @josiah-mbao
+tests/ @josiah-mbao
+
+# Documentation
+README.md @josiah-mbao
+docs/ @josiah-mbao
+CONTRIBUTING.md @josiah-mbao
+
+# CI/CD and infrastructure
+.github/ @josiah-mbao
+pyproject.toml @josiah-mbao
+Makefile @josiah-mbao
