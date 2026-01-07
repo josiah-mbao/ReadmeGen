@@ -1,4 +1,6 @@
 # [ReadmeGen](https://josiah-mbao.github.io/readmegen-site/)
+![demo](https://github.com/user-attachments/assets/e5d89cfb-44b2-44ad-943f-2ba5f198c43d)
+
 
 [![CI](https://github.com/josiah-mbao/ReadmeGen/workflows/CI/badge.svg)](https://github.com/josiah-mbao/ReadmeGen/actions)
 [![codecov](https://codecov.io/gh/josiah-mbao/ReadmeGen/branch/master/graph/badge.svg)](https://codecov.io/gh/josiah-mbao/ReadmeGen)
@@ -6,7 +8,7 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/readmegen-oss.svg)](https://pypi.org/project/readmegen-oss/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI-Powered GitHub README Generator - Zero-friction CLI for professional README files
+GitHub README Template Generator - Zero-friction CLI for professional README files
 
 ## 🚀 Quick Start
 
