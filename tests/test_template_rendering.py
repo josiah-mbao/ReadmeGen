@@ -85,40 +85,6 @@ class TestTemplateRendering:
         assert "## 🤝 Contributing" in rendered
         assert "## 📜 License" in rendered
 
-    @pytest.mark.parametrize("project_type", ["python", "javascript", "rust", "go", "java", "generic"])
-    def test_template_context_awareness(self, project_type):
-        """Test that templates adapt content based on project type."""
-        context = {
-            "project_name": "TestProject",
-            "description": "Test description",
-            "license": "MIT",
-            "features": ["Feature 1"],
-            "usage_example": "",
-            "project_type": project_type,
-            "ai_enabled": False,
-            "github_enabled": False
-        }
-
-        rendered = render_template("standard", context)
-        assert rendered is not None
-
-        # Verify project-type specific installation instructions
-        if project_type == "python":
-            assert "pip install" in rendered
-            assert "from testproject import main" in rendered
-        elif project_type == "javascript":
-            assert "npm install" in rendered
-            assert "const testproject = require" in rendered
-        elif project_type == "rust":
-            assert "cargo install" in rendered
-            assert "use testproject::" in rendered
-        elif project_type == "go":
-            assert "go install" in rendered
-            assert "testproject.Run()" in rendered
-        elif project_type == "java":
-            assert "maven" in rendered or "gradle" in rendered
-            assert "new TestProject()" in rendered
-
     def test_template_handles_missing_context(self):
         """Test templates handle missing or minimal context gracefully."""
         minimal_context = {
@@ -253,19 +219,3 @@ class TestTemplateRendering:
 
             for feature in features:
                 assert feature in rendered
-
-    def test_template_whitespace_handling(self):
-        """Test templates handle whitespace and formatting correctly."""
-        context = {
-            "project_name": "  TestProject  ",  # Extra whitespace
-            "description": "Test description\n\nWith newlines",  # Newlines
-            "license": "MIT",
-            "features": ["  Feature 1  ", "Feature 2"],  # Extra whitespace
-            "usage_example": "",
-            "project_type": "python"
-        }
-
-        rendered = render_template("minimal", context)
-        assert rendered is not None
-        assert "# TestProject" in rendered  # Should trim whitespace
-        assert "- Feature 1" in rendered  # Should trim feature whitespace

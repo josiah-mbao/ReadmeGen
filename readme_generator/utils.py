@@ -7,38 +7,48 @@ and other utility tasks.
 
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 
-def validate_project_name(project_name: str) -> bool:
+def validate_project_name(project_name: str) -> Union[bool, str]:
     """
     Validate project name format.
-    
+
     Args:
         project_name: Name to validate
-    
+
     Returns:
-        True if valid, False otherwise
+        True if valid, error message string if invalid
     """
     if not project_name or not project_name.strip():
-        return False
-    
-    # Allow alphanumeric characters, spaces, hyphens, and underscores
-    pattern = r'^[a-zA-Z0-9\s\-_]+$'
-    return bool(re.match(pattern, project_name.strip()))
+        return "Project name cannot be empty"
+
+    stripped = project_name.strip()
+    if len(stripped) > 50:
+        return "Project name cannot be longer than 50 characters"
+
+    # Allow alphanumeric characters, hyphens, and underscores (no spaces)
+    pattern = r'^[a-zA-Z0-9\-_]+$'
+    if not re.match(pattern, stripped):
+        return "Project name can only contain letters, numbers, hyphens, and underscores"
+
+    return True
 
 
-def validate_description(description: str) -> bool:
+def validate_description(description: str) -> Union[bool, str]:
     """
     Validate project description.
-    
+
     Args:
         description: Description to validate
-    
+
     Returns:
-        True if valid, False otherwise
+        True if valid, error message string if invalid
     """
-    return bool(description and description.strip())
+    if not description or not description.strip():
+        return "Description cannot be empty"
+
+    return True
 
 
 def validate_output_path(output_path: Path) -> bool:

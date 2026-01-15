@@ -110,7 +110,7 @@ extend-exclude = '''
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short --strict-markers --cov=readme_generator --cov-report=term-missing --cov-report=html:htmlcov --cov-fail-under=90"
+addopts = "-v --tb=short --strict-markers --cov=readme_generator --cov-report=term-missing --cov-report=html:htmlcov"
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",

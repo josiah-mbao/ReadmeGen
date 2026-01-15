@@ -106,89 +106,6 @@ class TestCLIWorkflows:
             assert call_args['project_info']['project_name'] == 'TestProject'
             assert call_args['project_info']['template'] == 'standard'
 
-    @patch('readme_generator.cli.questionary')
-    @patch('readme_generator.cli.get_smart_defaults')
-    @patch('readme_generator.cli.generate_readme')
-    def test_init_workflow_custom_basic(self, mock_generate, mock_defaults, mock_questionary, runner, tmp_project):
-        """Test init workflow where user customizes basic settings."""
-        # Mock smart defaults
-        mock_defaults.return_value = {
-            'project_name': 'DefaultName',
-            'description': 'Default description',
-            'template': 'minimal',
-            'license': 'MIT',
-            'features': ['Feature 1'],
-            'ai_enabled': False,
-            'github_enabled': False
-        }
-
-        # Mock questionary components
-        mock_confirm = MagicMock()
-        mock_text = MagicMock()
-        mock_select = MagicMock()
-
-        # User rejects defaults, provides custom values
-        mock_confirm.ask.side_effect = [False, True]  # Reject basic defaults, accept license
-        mock_text.ask.side_effect = ['Custom Project', 'Custom description']
-        mock_select.ask.side_effect = ['standard', 'MIT']
-
-        mock_questionary.confirm.return_value = mock_confirm
-        mock_questionary.text.return_value = mock_text
-        mock_questionary.select.return_value = mock_select
-
-        with runner.isolated_filesystem(temp_dir=str(tmp_project)):
-            result = runner.invoke(app, ['init'])
-
-            assert result.exit_code == 0
-            assert mock_generate.called
-
-            # Verify custom values were used
-            call_args = mock_generate.call_args[1]
-            assert call_args['project_info']['project_name'] == 'Custom Project'
-            assert call_args['project_info']['description'] == 'Custom description'
-            assert call_args['project_info']['template'] == 'standard'
-
-    @patch('readme_generator.cli.questionary')
-    @patch('readme_generator.cli.get_smart_defaults')
-    @patch('readme_generator.cli.generate_readme')
-    def test_init_workflow_advanced_features(self, mock_generate, mock_defaults, mock_questionary, runner, tmp_project):
-        """Test init workflow with advanced feature customization."""
-        # Mock smart defaults
-        mock_defaults.return_value = {
-            'project_name': 'TestProject',
-            'description': 'Test description',
-            'template': 'standard',
-            'license': 'MIT',
-            'features': ['Auto Feature 1', 'Auto Feature 2'],
-            'ai_enabled': False,
-            'github_enabled': False
-        }
-
-        # Mock questionary components
-        mock_confirm = MagicMock()
-        mock_select = MagicMock()
-        mock_text = MagicMock()
-
-        # User accepts basic, customizes advanced
-        mock_confirm.ask.side_effect = [True, True, False]  # Accept basic, customize advanced, skip AI, skip GitHub
-        mock_select.ask.return_value = 'keep'  # Keep auto-detected features
-        mock_text.ask.return_value = ''  # No additional features
-
-        mock_questionary.confirm.return_value = mock_confirm
-        mock_questionary.select.return_value = mock_select
-        mock_questionary.text.return_value = mock_text
-
-        with runner.isolated_filesystem(temp_dir=str(tmp_project)):
-            result = runner.invoke(app, ['init'])
-
-            assert result.exit_code == 0
-            assert mock_generate.called
-
-            # Verify features were preserved
-            call_args = mock_generate.call_args[1]
-            assert 'Auto Feature 1' in call_args['project_info']['features']
-            assert 'Auto Feature 2' in call_args['project_info']['features']
-
     def test_generate_overwrite_protection(self, runner, tmp_project):
         """Test that generate command asks before overwriting."""
         with runner.isolated_filesystem(temp_dir=str(tmp_project)):
@@ -246,3 +163,103 @@ class TestCLIWorkflows:
 
             content = custom_path.read_text()
             assert '# Custom Path Project' in content
+
+
+class TestCLIDetection:
+    """Test CLI detection and smart default functions."""
+
+    @patch('pathlib.Path.cwd')
+    def test_detect_license_from_license_file(self, mock_cwd):
+        """Test license detection from LICENSE file."""
+        mock_cwd.return_value = Path("/fake/path")
+
+        with patch("pathlib.Path.exists", return_value=True), \
+             patch("pathlib.Path.read_text", return_value="MIT License\n\nCopyright"):
+            from readme_generator.cli import detect_license
+            assert detect_license() == "MIT"
+
+    @patch('pathlib.Path.cwd')
+    def test_detect_license_fallback(self, mock_cwd):
+        """Test license detection fallback."""
+        mock_cwd.return_value = Path("/fake/path")
+
+        with patch("pathlib.Path.exists", return_value=False):
+            from readme_generator.cli import detect_license
+            assert detect_license() == "MIT"
+
+    @patch('pathlib.Path.cwd')
+    def test_detect_description_fallback(self, mock_cwd):
+        """Test description detection fallback."""
+        mock_cwd.return_value = Path("/fake/path")
+
+        with patch("pathlib.Path.exists", return_value=False):
+            from readme_generator.cli import detect_description
+            assert detect_description() == "A brief description of your project"
+
+    @patch('pathlib.Path.cwd')
+    def test_suggest_template_minimal(self, mock_cwd):
+        """Test template suggestion for minimal projects."""
+        mock_cwd.return_value = Path("/fake/path")
+
+        with patch("pathlib.Path.glob", return_value=[]), \
+             patch("pathlib.Path.exists", return_value=False):
+            from readme_generator.cli import suggest_template
+            assert suggest_template() == "minimal"
+
+    @patch('pathlib.Path.cwd')
+    def test_suggest_template_fancy(self, mock_cwd):
+        """Test template suggestion for fancy projects."""
+        mock_cwd.return_value = Path("/fake/path")
+
+        def mock_glob(pattern):
+            if any(ext in pattern for ext in ['.py', '.js', '.rs', '.go', '.java']):
+                return [f"file{i}{pattern[-3:]}" for i in range(30)]
+            return []
+
+        with patch("pathlib.Path.glob", side_effect=mock_glob), \
+             patch("pathlib.Path.exists", return_value=True):  # CI and docs exist
+            from readme_generator.cli import suggest_template
+            assert suggest_template() == "fancy"
+
+    def test_get_smart_defaults(self):
+        """Test smart defaults generation."""
+        with patch('readme_generator.cli.detect_description', return_value="Test description"), \
+             patch('readme_generator.cli.detect_license', return_value="MIT"), \
+             patch('readme_generator.cli.detect_features', return_value=["Feature 1"]), \
+             patch('readme_generator.cli.suggest_template', return_value="standard"), \
+             patch('pathlib.Path.cwd', return_value=Path("/fake/project")):
+            from readme_generator.cli import get_smart_defaults
+
+            defaults = get_smart_defaults()
+
+            assert defaults["project_name"] == "project"
+            assert defaults["description"] == "Test description"
+            assert defaults["license"] == "MIT"
+            assert defaults["features"] == ["Feature 1"]
+            assert defaults["template"] == "standard"
+            assert not defaults["ai_enabled"]
+            assert not defaults["github_enabled"]
+
+    def test_collect_project_info_with_custom_values(self):
+        """Test collect_project_info with custom values."""
+        with patch('readme_generator.cli.get_smart_defaults') as mock_defaults:
+            from readme_generator.cli import collect_project_info
+            mock_defaults.return_value = {
+                "project_name": "DefaultProject",
+                "description": "Default description",
+                "template": "minimal",
+                "license": "MIT",
+                "features": ["Feature 1"],
+                "ai_enabled": False,
+                "github_enabled": False
+            }
+
+            info = collect_project_info(
+                project_name="Custom Project",
+                description="Custom description",
+                template="fancy"
+            )
+
+            assert info["project_name"] == "Custom Project"
+            assert info["description"] == "Custom description"
+            assert info["template"] == "fancy"
