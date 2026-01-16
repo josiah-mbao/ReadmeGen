@@ -6,7 +6,7 @@ Tests complete user journeys and CLI command interactions.
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
 from readme_generator.cli import app, collect_project_info_interactive
 from readme_generator.generator import generate_readme
@@ -27,6 +27,7 @@ class TestCLIWorkflows:
 
     def test_generate_command_basic(self, runner, tmp_project):
         """Test basic generate command with minimal options."""
+        import os
         with runner.isolated_filesystem(temp_dir=str(tmp_project)):
             result = runner.invoke(app, [
                 'generate',
@@ -37,10 +38,11 @@ class TestCLIWorkflows:
             ])
 
             assert result.exit_code == 0
-            assert 'README.md created' in result.output
-            assert (tmp_project / 'README.md').exists()
+            assert 'README generated successfully' in result.output
+            readme_path = Path('README.md')
+            assert readme_path.exists()
 
-            content = (tmp_project / 'README.md').read_text()
+            content = readme_path.read_text()
             assert '# Test Project' in content
             assert 'A test project' in content
 
@@ -56,9 +58,10 @@ class TestCLIWorkflows:
             ])
 
             assert result.exit_code == 0
-            assert (tmp_project / 'README.md').exists()
+            readme_path = Path('README.md')
+            assert readme_path.exists()
 
-            content = (tmp_project / 'README.md').read_text()
+            content = readme_path.read_text()
             assert '# Advanced Project' in content
             assert 'comprehensive project' in content
             assert '✨ Features' in content  # Fancy template marker
@@ -127,8 +130,8 @@ class TestCLIWorkflows:
     def test_generate_force_overwrite(self, runner, tmp_project):
         """Test that --force flag allows overwriting existing README."""
         with runner.isolated_filesystem(temp_dir=str(tmp_project)):
-            # Create existing README
-            readme_path = tmp_project / 'README.md'
+            # Create existing README in the isolated directory
+            readme_path = Path('README.md')
             readme_path.write_text('# Existing README')
 
             # Generate with force
